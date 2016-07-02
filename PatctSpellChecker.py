@@ -11,7 +11,7 @@
 import argparse
 import re
 import collections
-import sys
+import glob
 import os
 
 # Parse arguments
@@ -47,9 +47,9 @@ class SpellChecker():
     #   - One word in one line
     #
     def prepare(self):
-        files = os.listdir(self.dict_dir)
+        files = glob.glob(self.dict_dir + "/*.dict")
         for file in files:
-            fp = open(self.dict_dir + file, 'r')
+            fp = open(file, 'r')
 
             # Process each line
             for line in fp:
