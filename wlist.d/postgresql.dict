@@ -1,0 +1,10 @@
+postgresql
+tuple
+backends
+backend
+xmax
+xmin
+catalog
+xid
+PD_ALL_VISIBLE
+xl_heap_lock
