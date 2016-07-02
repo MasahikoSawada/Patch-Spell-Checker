@@ -12,17 +12,23 @@ import argparse
 import re
 import collections
 import glob
+import sys
 import os
+
+# Const values
+WLIST_DIR = "wlist.d"
 
 # Parse arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--dir', help="Specify directory path where stores dictionary files")
+parser.add_argument('-d', '--dir', help="Specify directory path where stores dictionary files", default=WLIST_DIR)
 parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
+parser.add_argument('-f', '--file', help="Spell checking target file. \'-\' by default means input from stdin.", default='-')
 parser.add_argument('--debug', action='store_true', help='Enable debuggin output')
 args = parser.parse_args()
 path = args.dir
 verbose = args.verbose
 debug = args.debug
+file = args.file
 
 class SpellChecker():
     #
@@ -126,44 +132,56 @@ def check_words(words):
         if not sp.isCorrect(word):
             print "\"%s\" might be wrong" % word
 #
+# Check multiple lines if each word is correct.
+# If doubtful word is detected, we check it using some approaches in
+# check_words() function.
+#
+def check_lines(lines):
+    in_comment = False
+
+    for line in lines:
+
+        # Skip empty line
+        if not p_d_a.match(line):
+            continue
+        line = re.sub(r'\n', '', line).lower()
+
+        # One line comment
+        if line.find('/*') > -1 and line.find('*/') > -1:
+            words = p_a.findall(line)
+            check_words(words)
+            continue
+
+        if line.find('/*') > -1:
+            in_comment = True
+            continue
+
+        if line.find('*/') > -1:
+            in_comment = False
+            continue
+
+        # Multi line comment
+        if in_comment:
+            words = p_a.findall(line)
+            check_words(words)
+
+#
 # Main Routine
 #
-raw_input = sys.stdin.readlines()
 pattern_diff_add = r'^\+.*'
 pattern_comment = r'\/\*.*\*\/'
 pattern_alphabet = r'[a-z\_\-\']+'
 p_d_a = re.compile(pattern_diff_add)
 p_c = re.compile(pattern_comment)
 p_a = re.compile(pattern_alphabet)
-in_comment = False
 
 #
-# Process each input lines from stdin. We are intereted in only added and
-# comment line in patch file. Once we detect it we check if it is correct word
-# using dictionary.
+# Process each input lines from stdin or specified file. We are intereted in
+# only added and comment line in patch file. Once we detect it we check if it
+# is correct word using dictionary.
 #
-for line in raw_input:
-
-    # Skip empty line
-    if not p_d_a.match(line):
-        continue
-    line = re.sub(r'\n', '', line).lower()
-
-    # One line comment
-    if line.find('/*') > -1 and line.find('*/') > -1:
-        words = p_a.findall(line)
-        check_words(words)
-        continue
-
-    if line.find('/*') > -1:
-        in_comment = True
-        continue
-
-    if line.find('*/') > -1:
-        in_comment = False
-        continue
-
-    # Multi line comment
-    if in_comment:
-        words = p_a.findall(line)
-        check_words(words)
+if file == '-':
+    lines = sys.stdin.readlines()
+else:
+    lines = open(file, 'r')
+check_lines(lines)
