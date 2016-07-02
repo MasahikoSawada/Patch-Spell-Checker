@@ -16,11 +16,11 @@ import sys
 import os
 
 # Const values
-WLIST_DIR = "wlist.d"
+WLIST_DIR = os.getenv("WLIST_DIR", default="wlist.d")
 
 # Parse arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--dir', help="Specify directory path where stores dictionary files. \"" + WLIST_DIR + "\" by default.", default=WLIST_DIR)
+parser.add_argument('-d', '--dir', help="Specify directory path where stores dictionary files. WLIST_DIR environemnt variable by default.", default=WLIST_DIR)
 parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output.')
 parser.add_argument('-f', '--file', help="Spell checking target file. \'-\' by default means input from stdin.", default='-')
 parser.add_argument('--debug', action='store_true', help='Enable debuggin output')
