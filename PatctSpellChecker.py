@@ -17,6 +17,8 @@ import os
 
 # Const values
 WLIST_DIR = os.getenv("WLIST_DIR", default="wlist.d")
+WRONG_WORD = '\033[92m' # Light green
+ENDC = '\033[0m'
 
 # Parse arguments
 parser = argparse.ArgumentParser()
@@ -127,10 +129,11 @@ if debug:
     sp.show_known_words()
 
 # Function definition
-def check_words(words):
+def check_words(words, line, lineno):
     for word in words:
         if not sp.isCorrect(word):
-            print "\"%s\" might be wrong" % word
+            print "\"%s%s%s\" might be wrong at line %d." % (WRONG_WORD, word, ENDC, lineno)
+            print "\t\"%s\"" % line
 #
 # Check multiple lines if each word is correct.
 # If doubtful word is detected, we check it using some approaches in
@@ -138,8 +141,10 @@ def check_words(words):
 #
 def check_lines(lines):
     in_comment = False
+    lineno = 0
 
     for line in lines:
+        lineno += 1
 
         # Skip empty line
         if not p_d_a.match(line):
@@ -149,7 +154,7 @@ def check_lines(lines):
         # One line comment
         if line.find('/*') > -1 and line.find('*/') > -1:
             words = p_a.findall(line)
-            check_words(words)
+            check_words(words, line, lineno)
             continue
 
         if line.find('/*') > -1:
@@ -163,7 +168,7 @@ def check_lines(lines):
         # Multi line comment
         if in_comment:
             words = p_a.findall(line)
-            check_words(words)
+            check_words(words, line, lineno)
 
 #
 # Main Routine
