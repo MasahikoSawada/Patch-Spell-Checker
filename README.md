@@ -1,5 +1,5 @@
 # Patch-Spell-Checker
-Spell checker for patch file written in C language.
+Spell checker for patch file written in C or C++ language.
 
 # Usage
 ```
