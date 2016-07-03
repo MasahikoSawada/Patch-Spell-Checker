@@ -1,5 +1,5 @@
 # Patch-Spell-Checker
-Spell checker for patch file written in C or C++ language.
+Customizable simple spell checker for patch file written in C or C++ language.
 
 # Usage
 ```
@@ -16,13 +16,20 @@ usage: PatctSpellChecker.py [-h] [-d DIR] [-v] [-f FILE] [--debug]
 ```
 
 # How to use
-PatchSpellChecker can spell check from stdin or spcified file.
+PatchSpellChecker can spell check from stdin or specified file.
+If patch file has doubtful word, PathSpellChecker emit suspicious word, the line number and line that has it.
 
 ```
 -- Set up
 $ export WLIST_DIR=/path/to/dictionary_dir
 -- From stdin
 $ git diff | python PatchSpellChecker.py
+"relasing" might be wrong at line 13.
+	"+		 * needed before relasing buffer. we can reuse xl_heap_lock"
+"pupose" might be wrong at line 14.
+	"+		 * for this pupose. it should be fine even if we crash midway"
+"celar" might be wrong at line 28.
+	"+		/* celar pd_all_visible flags */"
 -- Or from spcified file
 $ python PatchSpellChecker.py -f new_feature.patch
 ```
