@@ -33,8 +33,8 @@ The correctness of spell checking is depend on the amount of words in dictionary
 PatchSpellChecker can handle multiple dictionary files must be stored in a directory.
 The dictionary directory storing dictionary file is found by following priority.
 
-1. WLIST_DIR environment variable.
-2. Directory spcified by -d option
+1. Directory spcified by -d option
+2. WLIST_DIR environment variable.
 3. './wlist.d' directory.
 
 If you want to add some new word (e.g., terminology) you can customise existing dictionary file or add new dictionary file into directory.
