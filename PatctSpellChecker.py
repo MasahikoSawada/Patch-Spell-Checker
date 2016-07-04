@@ -24,17 +24,33 @@ ENDC = '\033[0m'
 
 # Parse arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--dir', help="Specify directory path where stores dictionary files. WLIST_DIR environemnt variable by default.", default=WLIST_DIR)
-parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output.')
-parser.add_argument('-f', '--file', help="Spell checking target file. \'-\' by default means input from stdin.", default='-')
-parser.add_argument('--debug', action='store_true', help='Enable debuggin output')
-parser.add_argument('-s', '--source-file', action='store_true', help='Focus on whole source file written in C or C++. False by default.', default=False)
+parser.add_argument('-d', '--dir',
+                    help="Specify directory path where stores dictionary files. WLIST_DIR environemnt variable by default.",
+                    default=WLIST_DIR)
+parser.add_argument('-v', '--verbose',
+                    action='store_true',
+                    help='Verbose output.')
+parser.add_argument('-f', '--file',
+                    help="Spell checking target file. \'-\' by default means input from stdin.",
+                    default='-')
+parser.add_argument('--debug',
+                    action='store_true',
+                    help='Enable debuggin output')
+parser.add_argument('-s', '--source-file',
+                    action='store_true',
+                    help='Focus on whole source file written in C or C++. False by default.',
+                    default=False)
+parser.add_argument('-w', '--show-word',
+                    action='store_true',
+                    help='Show only wrong word without line.',
+                    default=False)
 args = parser.parse_args()
 path = args.dir
 verbose = args.verbose
 debug = args.debug
 file = args.file
 source_file = args.source_file
+show_word = args.show_word
 
 class SpellChecker():
     #
@@ -136,8 +152,12 @@ if debug:
 def check_words(words, line, lineno):
     for word in words:
         if not sp.isCorrect(word):
-            print "\"%s%s%s\" might be wrong at line %d." % (WRONG_WORD, word, ENDC, lineno)
-            print "\t\"%s\"" % line
+            # If -w (--show-word) is specified, we show only the suspicious word.
+            if show_word:
+                print "%s%s%s" % (WRONG_WORD, word, ENDC)
+            else:
+                print "\"%s%s%s\" might be wrong at line %d." % (WRONG_WORD, word, ENDC, lineno)
+                print "\t\"%s\"" % line
 #
 # Check multiple lines if each word is correct.
 # If doubtful word is detected, we check it using some approaches in

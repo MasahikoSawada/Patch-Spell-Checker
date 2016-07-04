@@ -15,6 +15,7 @@ optional arguments:
   --debug               Enable debuggin output
   -s, --source-file     Focus on whole source file written in C or C++. False
                         by default.
+  -w, --show-word       Show only wrong word without line.
 ```
 
 # How to use
