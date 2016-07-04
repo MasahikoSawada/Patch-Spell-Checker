@@ -170,10 +170,12 @@ def check_lines(lines):
     for line in lines:
         lineno += 1
 
-        # Skip empty line
+        # Skip not-interested-in line
         if not source_file and not p_d_a.match(line):
             continue
-        line = re.sub(r'\n', '', line).lower()
+
+        # 'line' variable is the line removed new line(\n).
+        line = re.sub(r'[\n\"]', ' ', line).lower()
 
         # One line comment
         if line.find('/*') > -1 and line.find('*/') > -1:
@@ -199,7 +201,7 @@ def check_lines(lines):
 #
 pattern_diff_add = r'^\+.*'
 pattern_comment = r'\/\*.*\*\/'
-pattern_alphabet = r'[a-z\_\-\']+'
+pattern_alphabet = r'[a-z][a-z\_\-\']+[a-z]'
 p_d_a = re.compile(pattern_diff_add)
 p_c = re.compile(pattern_comment)
 p_a = re.compile(pattern_alphabet)
