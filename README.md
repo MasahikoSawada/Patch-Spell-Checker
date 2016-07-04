@@ -3,16 +3,18 @@ Customizable simple spell checker for patch file written in C or C++ language.
 
 # Usage
 ```
-$ python PatchSpellChecker.py --help
+$ ./PatchSpellChecker.py --help
 usage: PatctSpellChecker.py [-h] [-d DIR] [-v] [-f FILE] [--debug]
-
+optional arguments:
   -h, --help            show this help message and exit
   -d DIR, --dir DIR     Specify directory path where stores dictionary files.
                         WLIST_DIR environemnt variable by default.
   -v, --verbose         Verbose output.
- -f FILE, --file FILE   Spell checking target file. '-' by default means input
+  -f FILE, --file FILE  Spell checking target file. '-' by default means input
                         from stdin.
- --debug               Enable debuggin output
+  --debug               Enable debuggin output
+  -s, --source-file     Focus on whole source file written in C or C++. False
+                        by default.
 ```
 
 # How to use

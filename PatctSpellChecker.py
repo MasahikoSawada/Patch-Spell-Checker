@@ -28,11 +28,13 @@ parser.add_argument('-d', '--dir', help="Specify directory path where stores dic
 parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output.')
 parser.add_argument('-f', '--file', help="Spell checking target file. \'-\' by default means input from stdin.", default='-')
 parser.add_argument('--debug', action='store_true', help='Enable debuggin output')
+parser.add_argument('-s', '--source-file', action='store_true', help='Focus on whole source file written in C or C++. False by default.', default=False)
 args = parser.parse_args()
 path = args.dir
 verbose = args.verbose
 debug = args.debug
 file = args.file
+source_file = args.source_file
 
 class SpellChecker():
     #
@@ -149,7 +151,7 @@ def check_lines(lines):
         lineno += 1
 
         # Skip empty line
-        if not p_d_a.match(line):
+        if not source_file and not p_d_a.match(line):
             continue
         line = re.sub(r'\n', '', line).lower()
 
