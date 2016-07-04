@@ -22,6 +22,13 @@ WLIST_DIR = os.getenv("WLIST_DIR", default="wlist.d")
 WRONG_WORD = '\033[92m' # Light green
 ENDC = '\033[0m'
 
+pattern_diff_add = r'^\+.*'
+pattern_comment = r'\/\*.*\*\/'
+pattern_alphabet = r'[a-z][a-z\_\-\']+[a-z]'
+p_d_a = re.compile(pattern_diff_add)
+p_c = re.compile(pattern_comment)
+p_a = re.compile(pattern_alphabet)
+
 # Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--dir',
@@ -85,7 +92,8 @@ class SpellChecker():
                 if line == '\n':
                     continue
 
-                words = re.sub(r'[,.\n\"\!\;\:]', '', line).split(' ')
+                # Find all words from line.
+                words = p_a.findall(line)
 
                 # Consider each wrod
                 for w in words:
@@ -199,12 +207,6 @@ def check_lines(lines):
 #
 # Main Routine
 #
-pattern_diff_add = r'^\+.*'
-pattern_comment = r'\/\*.*\*\/'
-pattern_alphabet = r'[a-z][a-z\_\-\']+[a-z]'
-p_d_a = re.compile(pattern_diff_add)
-p_c = re.compile(pattern_comment)
-p_a = re.compile(pattern_alphabet)
 
 #
 # Process each input lines from stdin or specified file. We are intereted in
