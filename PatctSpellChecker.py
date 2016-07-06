@@ -20,6 +20,7 @@ import os
 # Const values
 WLIST_DIR = os.getenv("WLIST_DIR", default="wlist.d")
 WRONG_WORD = '\033[92m' # Light green
+LINE_WORD = '\033[91m'
 ENDC = '\033[0m'
 
 pattern_diff_add = r'^\+.*'
@@ -113,13 +114,22 @@ class SpellChecker():
 
                         # Extract each word into trgm
                     else:
-                        ww = ' ' + w + ' '
-                        trgms = [ ww[i] + ww[i+1] + ww[i+2] for i in range(n) ]
+                        trgms = self.extract_trgm(w)
                         for elem in trgms:
                             self.td[elem].add(str(self.keyID))
 
-                            # Increment keyID
-                            self.keyID += 1
+                    # Increment keyID
+                    self.keyID += 1
+
+    #
+    # Extract it into trigram, and return trigram list.
+    #
+    def extract_trgm(self, word):
+        n = len(word)
+        ww = ' '  + word + ' '
+        trgms = [ ww[i] + ww[i+1] + ww[i+2] for i in range(n) ]
+        return trgms
+
     #
     # Show dictionary information.
     #
@@ -144,28 +154,89 @@ class SpellChecker():
     #
     def isCorrect(self, word):
         if word in self.known_word:
-            return True
+            return None
         else:
-            return False
+            # Prepare for judgement.
+            alphabet = 'abcdefghijklmnopqrstuvwxyz'
+            n = len(word)
+            edit_set = set(
+                [word[0:i]+word[i+1:] for i in range(n)] +
+                [word[0:i]+word[i+1]+word[i]+word[i+2:] for i in range(n-1)] +
+                [word[0:i]+c+word[i+1:] for i in range(n) for c in alphabet] +
+                [word[0:i]+c+word[i:] for i in range(n+1) for c in alphabet])
 
-# Create SpellChecker intanse
-sp = SpellChecker(path)
-sp.prepare()
-if verbose:
-    sp.print_dict_info()
-if debug:
-    sp.show_known_words()
+            #
+            # If this word is not listed in known_word, we next search it
+            # using trgm similarity.
+            #
+            trgms = self.extract_trgm(word)
 
+            #
+            # We assumed that first 2 char might be correct in most cases.
+            # keyid_set stored the id for key that has same trgm part.
+            #
+            keyid_set = set()
+            for elem in trgms:
+                #keyid_set = keyid_set | (self.td[trgms[0]] & self.td[elem])
+                keyid_set = keyid_set | self.td[elem]
+
+            #
+            # First, we try to judge this word using distance between
+            # this word and other word. Using ids in keyid_set, we try to
+            # compare between id's key and word having 1 distence such as
+            # 'think' <-> 'thank', 'think' <-> 'htink'...
+            #
+            for elem in keyid_set:
+                if self.wd[int(elem)] in edit_set:
+                    return self.wd[int(elem)]
+
+            #
+            # Second, we judge this word using word similarity. calc_similarity
+            # function returns similarity value between word and candidate word.
+            # The word having maximum value will be selected as similar_word.
+            #
+            similarity_set = []
+            tmp_sim = 0
+            similar_word = ""
+            for elem in keyid_set:
+                similarity = float(self.calc_similarity(word, self.wd[int(elem)]))
+                if tmp_sim < similarity:
+                    tmp_sim = similarity
+                    similar_word = self.wd[int(elem)]
+
+            return similar_word
+
+    # Calculate similarity between w1, w2.
+    def calc_similarity(self, w1, w2):
+        t1 = self.extract_trgm(w1)
+        t2 = self.extract_trgm(w2)
+        len_t1 = len(t1)
+        len_t2 = len(t2)
+        matched = 0
+        ret = 0.0
+
+        for e1 in t1:
+            for e2 in t2:
+                if e1 == e2:
+                   matched += 1
+
+        ret = float(matched) / float((len_t1 + len_t2))
+        return ret
+
+##########################
 # Function definition
+##########################
 def check_words(words, line, lineno):
     for word in words:
-        if not sp.isCorrect(word):
+        correct_word = sp.isCorrect(word)
+        if not correct_word is None:
             # If -w (--show-word) is specified, we show only the suspicious word.
             if show_word:
                 print "%s%s%s" % (WRONG_WORD, word, ENDC)
             else:
-                print "\"%s%s%s\" might be wrong at line %d." % (WRONG_WORD, word, ENDC, lineno)
-                print "\t\"%s\"" % line
+                print "\"%s%s%s\" might be wrong at line %s%d%s. May be \"%s%s%s\" ?" % (WRONG_WORD, word, ENDC, LINE_WORD, lineno, ENDC, WRONG_WORD, correct_word, ENDC)
+                if verbose:
+                    print "\t\"%s\"" % line
 #
 # Check multiple lines if each word is correct.
 # If doubtful word is detected, we check it using some approaches in
@@ -204,15 +275,25 @@ def check_lines(lines):
             words = p_a.findall(line)
             check_words(words, line, lineno)
 
-#
+###########################
 # Main Routine
-#
+###########################
 
 #
 # Process each input lines from stdin or specified file. We are intereted in
 # only added and comment line in patch file. Once we detect it we check if it
 # is correct word using dictionary.
+
 #
+# Create SpellChecker intanse
+#
+sp = SpellChecker(path)
+sp.prepare()
+if verbose:
+    sp.print_dict_info()
+if debug:
+    sp.show_known_words()
+
 if file == '-':
     lines = sys.stdin.readlines()
 else:
