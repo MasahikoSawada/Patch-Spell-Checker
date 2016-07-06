@@ -27,15 +27,18 @@ If patch file has doubtful word, PathSpellChecker emit suspicious word, the line
 $ export WLIST_DIR=/path/to/dictionary_dir
 -- From stdin
 $ git diff | python PatchSpellChecker.py
-"relasing" might be wrong at line 13.
-	"+		 * needed before relasing buffer. we can reuse xl_heap_lock"
-"pupose" might be wrong at line 14.
-	"+		 * for this pupose. it should be fine even if we crash midway"
-"celar" might be wrong at line 28.
-	"+		/* celar pd_all_visible flags */"
+"privent" might be wrong at line 10. May be "prevent" ?
+"tulpe" might be wrong at line 12. May be "tuple" ?
+"relaesing" might be wrong at line 13. May be "releasing" ?
+"xl_heap_lock" might be wrong at line 13. May be "headlock" ?
+"pupose" might be wrong at line 14. May be "purpose" ?
+"appaer" might be wrong at line 16. May be "appear" ?
+"celar" might be wrong at line 28. May be "clear" ?
 -- Or from spcified file
 $ python PatchSpellChecker.py -f new_feature.patch
 ```
+
+The above "xl_heap_lock" is appeared as suspicious word. To solved it, you can define this word in dictionary file. (see below)
 
 # Dictionary file
 Dictionary file is the file having ".dict" type suffix that is used for spell checking.
