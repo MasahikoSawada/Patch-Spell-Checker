@@ -52,6 +52,10 @@ parser.add_argument('-w', '--show-word',
                     action='store_true',
                     help='Show only wrong word without line.',
                     default=False)
+parser.add_argument('-D', '--docs',
+                    action='store_true',
+                    help='Focus on document rather than C or C++ file. False by default.',
+                    default=False)
 args = parser.parse_args()
 path = args.dir
 verbose = args.verbose
@@ -59,6 +63,7 @@ debug = args.debug
 file = args.file
 source_file = args.source_file
 show_word = args.show_word
+docs = args.docs
 
 class SpellChecker():
     #
@@ -249,29 +254,40 @@ def check_lines(lines):
     for line in lines:
         lineno += 1
 
-        # Skip not-interested-in line
-        if not source_file and not p_d_a.match(line):
-            continue
+        if not docs:
+            # Skip not-interested-in line
+            if not source_file and not p_d_a.match(line):
+                continue
 
-        # 'line' variable is the line removed new line(\n).
-        line = re.sub(r'[\n\"]', ' ', line).lower()
+            # 'line' variable is the line removed new line(\n).
+            line = re.sub(r'[\n\"]', ' ', line).lower()
 
-        # One line comment
-        if line.find('/*') > -1 and line.find('*/') > -1:
-            words = p_a.findall(line)
-            check_words(words, line, lineno)
-            continue
+            # One line comment
+            if line.find('/*') > -1 and line.find('*/') > -1:
+                words = p_a.findall(line)
+                check_words(words, line, lineno)
+                continue
 
-        if line.find('/*') > -1:
-            in_comment = True
-            continue
+            if line.find('/*') > -1:
+                in_comment = True
+                continue
 
-        if line.find('*/') > -1:
-            in_comment = False
-            continue
+            if line.find('*/') > -1:
+                in_comment = False
+                continue
 
-        # Multi line comment
-        if in_comment:
+            # Multi line comment
+            if in_comment:
+                words = p_a.findall(line)
+                check_words(words, line, lineno)
+        else: # Parsing doc file
+            # Skip no-interested-in line
+            if not p_d_a.match(line):
+                continue
+
+            # 'line' variable is the line removed new line(\n).
+            line = re.sub(r'[\n\"]', ' ', line).lower()
+
             words = p_a.findall(line)
             check_words(words, line, lineno)
 
