@@ -16,6 +16,8 @@ optional arguments:
   -s, --source-file     Focus on whole source file written in C or C++. False
                         by default.
   -w, --show-word       Show only wrong word without line.
+  -D, --docs            Focus on document rather than C or C++ file. False by
+                        default.
 ```
 
 # How to use
