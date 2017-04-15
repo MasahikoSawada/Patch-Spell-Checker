@@ -237,7 +237,7 @@ def check_words(words, line, lineno):
         if not correct_word is None:
             # If -w (--show-word) is specified, we show only the suspicious word.
             if show_word:
-                print "%s%s%s" % (WRONG_WORD, word, ENDC)
+                print "%s" % (word)
             else:
                 print "\"%s%s%s\" might be wrong at line %s%d%s. May be \"%s%s%s\" ?" % (WRONG_WORD, word, ENDC, LINE_WORD, lineno, ENDC, WRONG_WORD, correct_word, ENDC)
                 if verbose:
@@ -282,7 +282,7 @@ def check_lines(lines):
                 check_words(words, line, lineno)
         else: # Parsing doc file
             # Skip no-interested-in line
-            if not p_d_a.match(line):
+            if not source_file and not p_d_a.match(line):
                 continue
 
             # 'line' variable is the line removed new line(\n).
